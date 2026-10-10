@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PCOS Saathi — AI-Powered Personal Health Copilot</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230f766e'><path d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/></svg>" />
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- React 18 & Babel Standalone via CDN -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    :root {
+      --primary-50: #f0fdfa;
+      --primary-100: #ccfbf1;
+      --primary-200: #99f6e4;
+      --primary-600: #0d9488;
+      --primary-700: #0f766e;
+      --primary-800: #115e59;
+      --primary-900: #134e4a;
+      --lavender-50: #f5f3ff;
+      --lavender-100: #ede9fe;
+      --lavender-700: #6d28d9;
+      --coral-50: #fff1f2;
+      --coral-100: #ffe4e6;
+      --coral-500: #f43f5e;
+      --coral-600: #e11d48;
+      --coral-700: #be123c;
+      --accent-yellow-light: #fef9c3;
+      --accent-yellow: #854d0e;
+      --accent-green-light: #dcfce7;
+      --accent-green: #166534;
+      --bg-page: #fbfbfc;
+      --bg-card: #ffffff;
+      --bg-subtle: #f8fafc;
+      --border-subtle: #e2e8f0;
+      --border-card: #e2e8f0;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --text-light: #94a3b8;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+      --font-heading: 'Outfit', sans-serif;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 18px;
+      --radius-xl: 24px;
+      --radius-full: 9999px;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-card: 0 4px 20px -2px rgba(15,23,42,0.05), 0 2px 6px -1px rgba(15,23,42,0.02);
+      --shadow-hover: 0 10px 25px -5px rgba(15,23,42,0.08);
+      --shadow-modal: 0 25px 50px -12px rgba(15,23,42,0.25);
+      --sidebar-width: 255px;
+      --navbar-height: 66px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-body);
+      background-color: var(--bg-page);
+      color: var(--text-primary);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      font-family: var(--font-heading);
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+      font-weight: 700;
+    }
+    button { font-family: inherit; cursor: pointer; border: none; background: none; transition: all 0.15s ease; }
+    input, select, textarea {
+      font-family: inherit;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      background: var(--bg-card);
+      color: var(--text-primary);
+      outline: none;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--primary-600);
+      box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+    }
+    .app-layout { display: flex; min-height: 100vh; }
+    .main-wrapper { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .content-area { flex: 1; padding: 26px 30px 60px 30px; max-width: 1260px; width: 100%; margin: 0 auto; }
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-card);
+      padding: 24px;
+      transition: all 0.2s ease;
+    }
+    .card:hover { box-shadow: var(--shadow-hover); }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      font-size: 0.74rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    .badge-primary { background: var(--primary-100); color: var(--primary-800); }
+    .badge-lavender { background: var(--lavender-100); color: var(--lavender-700); }
+    .badge-coral { background: var(--coral-100); color: var(--coral-700); }
+    .badge-warning { background: var(--accent-yellow-light); color: var(--accent-yellow); }
+    .badge-success { background: var(--accent-green-light); color: var(--accent-green); }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-weight: 600;
+      font-size: 0.88rem;
+      padding: 10px 18px;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .btn-primary { background: var(--primary-700); color: #ffffff; }
+    .btn-primary:hover { background: var(--primary-800); transform: translateY(-1px); }
+    .btn-secondary { background: var(--lavender-100); color: var(--lavender-700); }
+    .btn-secondary:hover { background: #ddd6fe; }
+    .btn-coral { background: var(--coral-600); color: #ffffff; }
+    .btn-coral:hover { background: var(--coral-700); }
+    .btn-outline { background: transparent; border: 1px solid var(--border-subtle); color: var(--text-primary); }
+    .btn-outline:hover { background: var(--bg-subtle); border-color: #cbd5e1; }
+    .btn-ghost { background: transparent; color: var(--text-secondary); }
+    .btn-ghost:hover { background: var(--bg-subtle); color: var(--text-primary); }
+    .btn-sm { padding: 6px 12px; font-size: 0.8rem; border-radius: var(--radius-sm); }
+    .btn-lg { padding: 14px 26px; font-size: 1rem; border-radius: var(--radius-lg); }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .form-group { margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px; }
+    .form-label { font-size: 0.84rem; font-weight: 600; color: var(--text-primary); }
+    .form-hint { font-size: 0.74rem; color: var(--text-muted); }
+    @keyframes pulseGlow {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.4); }
+      70% { transform: scale(1.05); box-shadow: 0 0 0 12px rgba(225, 29, 72, 0); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(225, 29, 72, 0); }
+    }
+    .mic-active { animation: pulseGlow 1.8s infinite; }
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(15,23,42,0.45);
+      backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center;
+      z-index: 1000; padding: 20px;
+    }
+    .modal-content {
+      background: #ffffff; border-radius: var(--radius-xl); box-shadow: var(--shadow-modal);
+      width: 100%; max-width: 580px; max-height: 88vh; overflow-y: auto; border: 1px solid var(--border-subtle);
+    }
+    .modal-header { padding: 18px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); }
+    .modal-body { padding: 22px 24px; }
+    .modal-footer { padding: 14px 24px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: flex-end; gap: 10px; background: var(--bg-subtle); }
+    @media (max-width: 900px) {
+      .app-sidebar { display: none; }
+      .grid-3, .grid-2 { grid-template-columns: 1fr; }
+      .content-area { padding: 16px 16px 80px 16px; }
+      .mobile-bottom-nav { display: flex !important; }
+    }
+    @media print {
+      .app-sidebar, header, .mobile-bottom-nav, .no-print, button { display: none !important; }
+      .content-area { padding: 0 !important; max-width: 100% !important; }
+      body { background: #ffffff !important; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    // --- MOCK DATA ---
+    const INITIAL_REPORTS = [
+      {
+        id: 'rep-1',
+        fileName: 'Thyroid_and_Insulin_Panel_Oct2026.pdf',
+        category: 'Blood Test',
+        uploadDate: '2026-10-02',
+        fileType: 'PDF',
+        doctorNotes: 'Ordered by Dr. Sharmila (Gynecologist) to evaluate cycle delays and metabolic health.',
+        biomarkers: [
+          { testName: 'TSH (Thyroid Stimulating Hormone)', value: '4.85', unit: 'mIU/L', referenceRange: '0.40 - 4.50 mIU/L', status: 'elevated', plainExplanation: 'TSH is mildly elevated above the standard range, suggesting subclinical thyroid slowing that can affect menstrual regularity.' },
+          { testName: 'Fasting Serum Insulin', value: '18.4', unit: 'uIU/mL', referenceRange: '2.0 - 24.9 uIU/mL', status: 'normal', plainExplanation: 'In upper normal tier. Clinicians monitor insulin to assess dietary insulin sensitivity in PCOS.' },
+          { testName: 'HbA1c (Glycated Hemoglobin)', value: '5.3', unit: '%', referenceRange: '4.0 - 5.6 %', status: 'normal', plainExplanation: 'Healthy average blood sugar over the previous 90 days.' }
+        ],
+        plainSummary: 'Your panel highlights 1 borderline elevated biomarker (TSH at 4.85 mIU/L). Fasting insulin and HbA1c are within standard laboratory limits. This report is automatically cross-referenced in your Doctor Consultation Sheet.'
+      },
+      {
+        id: 'rep-2',
+        fileName: 'Pelvic_Ultrasound_Summary_Sep2026.pdf',
+        category: 'Ultrasound',
+        uploadDate: '2026-09-18',
+        fileType: 'PDF',
+        doctorNotes: 'Transvaginal sonography for ovarian volume and follicular monitoring.',
+        biomarkers: [
+          { testName: 'Right Ovarian Volume', value: '11.8', unit: 'cm³', referenceRange: '3.0 - 10.0 cm³', status: 'elevated', plainExplanation: 'Mildly increased volume. In PCOS, ovaries frequently appear mildly enlarged due to non-dominant follicles.' },
+          { testName: 'Antral Follicle Count', value: '14 - 16', unit: 'follicles', referenceRange: '< 12 follicles', status: 'elevated', plainExplanation: 'Multiple immature follicles arranged peripherally. Clinicians combine this with menstrual history for diagnosis.' },
+          { testName: 'Endometrial Thickness', value: '7.2', unit: 'mm', referenceRange: '4.0 - 12.0 mm', status: 'normal', plainExplanation: 'Normal uterine lining thickness for the post-menstrual phase.' }
+        ],
+        plainSummary: 'Pelvic ultrasound shows mild bilateral ovarian enlargement with peripheral follicles (14-16 follicles noted). Uterine architecture and endometrial stripe appear healthy.'
+      }
+    ];
+
+    const INDIAN_MEALS = [
+      {
+        id: 'm1', name: 'Moong Dal Pesarattu with Ginger Chutney', category: 'breakfast', dietType: 'vegetarian', prepTime: '20 mins', budget: 'budget_friendly', image: '🌱',
+        protein: '14g plant protein', fibre: '9g dietary fibre', approxCalories: '260 kcal',
+        whyItWorks: 'Whole moong dal has a very low glycemic index, releasing glucose slowly into the bloodstream and preventing morning insulin surges.',
+        ingredients: ['Whole green moong dal', 'Fresh ginger', 'Green chillies', 'Cumin seeds', 'Onions'],
+        instructions: 'Soak whole moong overnight, grind with ginger and cumin. Pour batter onto a warm tawa like a dosa and cook with minimal cold-pressed oil.'
+      },
+      {
+        id: 'm2', name: 'Steamed Ragi Idli with Sprouted Sambar', category: 'breakfast', dietType: 'vegetarian', prepTime: '15 mins', budget: 'budget_friendly', image: '🌾',
+        protein: '11g protein', fibre: '8g fibre', approxCalories: '280 kcal',
+        whyItWorks: 'Ragi is rich in natural calcium, magnesium, and slow-burning complex carbs that support insulin sensitivity.',
+        ingredients: ['Ragi flour', 'Urad dal', 'Toor dal', 'Drumsticks', 'Carrots', 'Tomatoes'],
+        instructions: 'Ferment ragi and urad dal batter. Steam for 10 minutes. Serve hot with lentil and vegetable sambar.'
+      },
+      {
+        id: 'm3', name: 'Foxtail Millet (Korralu) with Palak Dal & Curd', category: 'lunch', dietType: 'vegetarian', prepTime: '25 mins', budget: 'budget_friendly', image: '🥣',
+        protein: '16g protein', fibre: '11g fibre', approxCalories: '390 kcal',
+        whyItWorks: 'Swapping refined white rice with foxtail millet slows glucose release. Spinach supplies magnesium which assists hormone regulation.',
+        ingredients: ['Foxtail millet', 'Spinach (Palak)', 'Toor dal', 'Fresh probiotic curd', 'Garlic'],
+        instructions: 'Cook foxtail millet with 2:1 water. Prepare dal with wilted spinach, tempered with garlic and cumin. Pair with 1 bowl of curd.'
+      },
+      {
+        id: 'm4', name: 'Kala Chana & Methi Sundal with Cucumber Salad', category: 'snacks', dietType: 'vegetarian', prepTime: '15 mins', budget: 'budget_friendly', image: '🥗',
+        protein: '10g plant protein', fibre: '8.5g soluble fibre', approxCalories: '210 kcal',
+        whyItWorks: 'Fenugreek (methi) supports cellular insulin action. Chickpeas provide sustained afternoon satiety without post-snack crashes.',
+        ingredients: ['Boiled black chana', 'Methi leaves', 'Grated coconut', 'Lemon juice', 'Cucumber'],
+        instructions: 'Toss boiled chickpeas with chopped methi leaves, a dash of cold-pressed oil, mustard seeds, and fresh lemon juice.'
+      },
+      {
+        id: 'm5', name: '2 Jowar Rotis with Paneer Bhurji & Lauki Curry', category: 'dinner', dietType: 'vegetarian', prepTime: '25 mins', budget: 'everyday', image: '🫓',
+        protein: '19g protein', fibre: '9g fibre', approxCalories: '380 kcal',
+        whyItWorks: 'Jowar is gluten-free and low GI. Paneer provides casein protein which promotes steady amino acid delivery throughout the night.',
+        ingredients: ['Jowar flour', 'Low-fat paneer', 'Bottle gourd (lauki)', 'Tomatoes', 'Turmeric'],
+        instructions: 'Hand-pat jowar rotis on tawa. Sauté scrambled paneer with chopped tomatoes and onions. Serve alongside stewed bottle gourd curry.'
+      },
+      {
+        id: 'm6', name: 'South Indian Chepala Pulusu (Fish Curry) with Brown Rice', category: 'lunch', dietType: 'non_vegetarian', prepTime: '35 mins', budget: 'everyday', image: '🐟',
+        protein: '26g protein', fibre: '5g fibre', approxCalories: '420 kcal',
+        whyItWorks: 'Fish provides anti-inflammatory Omega-3 fatty acids, which help mitigate chronic low-grade inflammation in PCOS.',
+        ingredients: ['Rohu/Salmon fish', 'Tamarind pulp', 'Fenugreek seeds', 'Brown rice', 'Shallots'],
+        instructions: 'Simmer fish fillets in a tangy tamarind gravy tempered with methi seeds. Serve with measured cooked brown rice.'
+      }
+    ];
+
+    const KNOWLEDGE_RESPONSES = {
+      pcos_en: "PCOS (Polycystic Ovary Syndrome) is a hormonal condition where ovaries may not release an egg regularly. This can cause irregular menstrual cycles, acne, excess hair, or weight changes. It is manageable through consistent balanced nutrition, regular movement, and clinician care.",
+      pcos_te: "పిసిఒఎస్ (PCOS) అనేది మహిళల్లో హార్మోన్ల అసమతుల్యత వల్ల వచ్చే సాధారణ జీవనశైలి సమస్య. దీనివల్ల పీరియడ్స్ ఆలస్యం కావడం, ముఖంపై మొటిమలు, లేదా బరువు పెరగడం జరగవచ్చు. సమతుల్య ఆహారం, రోజూ వ్యాయామం, మరియు డాక్టర్ మార్గదర్శకత్వంతో దీనిని చక్కగా నియంత్రించవచ్చు.",
+      diet_en: "PCOS Indian Nutrition Tips:\n1. Choose millets (foxtail, ragi, jowar) over refined white rice.\n2. Prioritize protein in every meal: moong dal pesarattu, sprouts, paneer, or eggs.\n3. Incorporate methi (fenugreek) seeds to support glucose tolerance.\n4. Avoid restrictive crash diets; sustainable nourishing habits work best.",
+      diet_te: "మన తెలుగు ఆహార సూచనలు:\n1. తెల్ల బియ్యం బదులు కొర్రలు, రాగులు, జొన్నలు వాడండి.\n2. ప్రతి పూట పెసరట్టు, మొలకలు, పప్పు ద్వారా మంచి ప్రొటీన్ తీసుకోండి.\n3. మెంతులు, అవిసె గింజలు ఇన్సులిన్ నియంత్రణకు సహాయపడతాయి.\n4. తీపి పదార్థాలు, బేకరీ వస్తువులు తగ్గించండి.",
+      doctor_en: "High-value questions for your doctor:\n1. 'Are my symptoms consistent with insulin resistance?'\n2. 'Do my mildly elevated TSH levels (4.85) require thyroid antibody screening?'\n3. 'What supplements (e.g. Inositol or Vitamin D) are appropriate for my profile?'\n4. 'When should I schedule a follow-up ultrasound?'",
+      doctor_te: "మీ డాక్టర్‌ని అడగాల్సిన ప్రశ్నలు:\n1. నా పీరియడ్స్ ఆలస్యం కావడానికి థైరాయిడ్ లేదా ఇన్సులిన్ కారణమా?\n2. నాకు అల్ట్రాసౌండ్ స్కాన్ అవసరమా?\n3. నా శరీర తత్వానికి ఎలాంటి విటమిన్లు లేదా సప్లిమెంట్లు మేలు చేస్తాయి?\n4. మళ్ళీ ఎప్పుడు చెకప్ కోసం రావాలి?"
+    };
+
+    function App() {
+      const [currentTab, setCurrentTab] = useState('dashboard');
+      const [language, setLanguage] = useState('en');
+      const isTe = language === 'te';
+
+      // State persistence via localStorage
+      const [profile, setProfile] = useState(() => {
+        const saved = localStorage.getItem('pcos_profile');
+        return saved ? JSON.parse(saved) : { name: 'Priya Sharma', age: 24, cycleLength: 33, diet: 'vegetarian' };
+      });
+
+      const [cycleLogs, setCycleLogs] = useState(() => {
+        const saved = localStorage.getItem('pcos_cycles');
+        return saved ? JSON.parse(saved) : [
+          { id: 1, startDate: '2026-09-25', durationDays: 4, flow: 'medium', symptoms: ['cramps', 'fatigue'], notes: 'Started after 38-day gap.' },
+          { id: 2, startDate: '2026-08-18', durationDays: 4, flow: 'medium', symptoms: ['bloating'], notes: 'Mild afternoon fatigue.' }
+        ];
+      });
+
+      const [reports, setReports] = useState(() => {
+        const saved = localStorage.getItem('pcos_reports');
+        return saved ? JSON.parse(saved) : INITIAL_REPORTS;
+      });
+
+      const [reminders, setReminders] = useState(() => {
+        const saved = localStorage.getItem('pcos_reminders');
+        return saved ? JSON.parse(saved) : [
+          { id: 1, title: 'Myo-Inositol Sachet with Water', category: 'medication', time: '08:30 AM', completed: false, notes: 'Take before breakfast' },
+          { id: 2, title: '30-min Evening Brisk Walk', category: 'exercise', time: '06:00 PM', completed: true, notes: 'Gentle cardio' },
+          { id: 3, title: 'Thyroid Panel Repeat Blood Draw', category: 'lab_test', time: '08:00 AM', completed: false, notes: 'Fasting 10-12 hours prior' }
+        ];
+      });
+
+      const [dailyPlan, setDailyPlan] = useState(() => {
+        const saved = localStorage.getItem('pcos_meal_plan');
+        return saved ? JSON.parse(saved) : { breakfast: INDIAN_MEALS[0], lunch: null, dinner: null };
+      });
+
+      const [chatMessages, setChatMessages] = useState([
+        { id: 1, sender: 'assistant', text: isTe ? 'నమస్తే ప్రియ! నేను మీ పిసిఒఎస్ సాథిని. ఆహారం, సైకిల్స్, లేదా రిపోర్టుల గురించి ఏదైనా అడగండి.' : 'Hello Priya! I am your PCOS Saathi companion. Ask me any health-education questions about cycles, Indian meals, or doctor visit preparation.', sources: ['WHO Guidelines', 'FOGSI Consensus'] }
+      ]);
+      const [chatInput, setChatInput] = useState('');
+      const [isListening, setIsListening] = useState(false);
+      const [playingAudioId, setPlayingAudioId] = useState(null);
+      const [isSpeaking, setIsSpeaking] = useState(false);
+
+      // Modals
+      const [activeModal, setActiveModal] = useState(null); // 'log_cycle', 'add_reminder', 'meal_detail', 'report_detail', 'report_post'
+      const [selectedMealDetail, setSelectedMealDetail] = useState(null);
+      const [selectedReportDetail, setSelectedReportDetail] = useState(null);
+
+      // Filters
+      const [mealCategoryFilter, setMealCategoryFilter] = useState('all');
+      const [mealDietFilter, setMealDietFilter] = useState('all');
+      const [budgetOnly, setBudgetOnly] = useState(false);
+
+      // Sync to localStorage
+      useEffect(() => { localStorage.setItem('pcos_profile', JSON.stringify(profile)); }, [profile]);
+      useEffect(() => { localStorage.setItem('pcos_cycles', JSON.stringify(cycleLogs)); }, [cycleLogs]);
+      useEffect(() => { localStorage.setItem('pcos_reports', JSON.stringify(reports)); }, [reports]);
+      useEffect(() => { localStorage.setItem('pcos_reminders', JSON.stringify(reminders)); }, [reminders]);
+      useEffect(() => { localStorage.setItem('pcos_meal_plan', JSON.stringify(dailyPlan)); }, [dailyPlan]);
+
+      // Global stop all audio and release media streams
+      const stopAudio = () => {
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+        }
+        document.querySelectorAll('audio, video').forEach(el => {
+          try {
+            el.pause();
+            el.currentTime = 0;
+          } catch (e) {}
+        });
+        setPlayingAudioId(null);
+        setIsSpeaking(false);
+      };
+
+      // Automatically stop voice playback if user switches tabs
+      useEffect(() => {
+        stopAudio();
+      }, [currentTab]);
+
+      // Automatically stop voice playback if user leaves or refreshes
+      useEffect(() => {
+        const handleUnload = () => {
+          stopAudio();
+        };
+        window.addEventListener('beforeunload', handleUnload);
+        return () => {
+          window.removeEventListener('beforeunload', handleUnload);
+          stopAudio();
+        };
+      }, []);
+
+      // Chat send
+      const handleSendChat = (text) => {
+        const query = text || chatInput;
+        if (!query.trim()) return;
+        stopAudio(); // Stop any previous speech
+        const userMsg = { id: Date.now(), sender: 'user', text: query };
+        setChatMessages(prev => [...prev, userMsg]);
+        setChatInput('');
+
+        setTimeout(() => {
+          let reply = isTe ? KNOWLEDGE_RESPONSES.pcos_te : KNOWLEDGE_RESPONSES.pcos_en;
+          let sources = ['WHO Guidelines'];
+          const qLower = query.toLowerCase();
+
+          if (qLower.includes('diet') || qLower.includes('food') || qLower.includes('tinali') || qLower.includes('aaharam')) {
+            reply = isTe ? KNOWLEDGE_RESPONSES.diet_te : KNOWLEDGE_RESPONSES.diet_en;
+            sources = ['ICMR Nutrition'];
+          } else if (qLower.includes('doctor') || qLower.includes('questions') || qLower.includes('adagali')) {
+            reply = isTe ? KNOWLEDGE_RESPONSES.doctor_te : KNOWLEDGE_RESPONSES.doctor_en;
+            sources = ['ACOG Guidelines'];
+          } else if (qLower.includes('severe pain') || qLower.includes('bleeding') || qLower.includes('నొప్పి')) {
+            reply = isTe
+              ? '⚠️ అత్యవసర హెచ్చరిక: తీవ్రమైన నొప్పి లేదా అధిక రక్తస్రావం ఉంటే వెంటనే సమీపంలోని అత్యవసర విభాగాన్ని (Emergency Care) సంప్రదించండి.'
+              : '⚠️ URGENT MEDICAL ADVISORY: Severe pelvic pain or excessive bleeding requires immediate in-person emergency clinical attention. Please consult an emergency room right away.';
+            sources = ['Emergency Medical Protocol'];
+          }
+
+          const botMsg = { id: Date.now() + 1, sender: 'assistant', text: reply, sources };
+          setChatMessages(prev => [...prev, botMsg]);
+        }, 600);
+      };
+
+      // Voice recognition
+      const handleVoiceInput = () => {
+        const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRec) {
+          alert(isTe ? 'మీ బ్రౌజర్ వాయిస్ రికగ్నిషన్ సపోర్ట్ చేయదు.' : 'Speech recognition is not supported in this browser. Please type your query.');
+          return;
+        }
+        const rec = new SpeechRec();
+        rec.lang = isTe ? 'te-IN' : 'en-IN';
+        rec.onstart = () => setIsListening(true);
+        rec.onend = () => setIsListening(false);
+        rec.onerror = () => setIsListening(false);
+        rec.onresult = (e) => {
+          const transcript = e.results[0][0].transcript;
+          handleSendChat(transcript);
+        };
+        rec.start();
+      };
+
+      // TTS audio playback with interactive Stop/Play toggle & clean release
+      const togglePlayAudio = (msgId, text) => {
+        if (!('speechSynthesis' in window)) {
+          alert(isTe ? 'మీ బ్రౌజర్ ఆడియో స్పీచ్ సపోర్ట్ చేయదు.' : 'Speech synthesis is not supported in this browser.');
+          return;
+        }
+
+        // Toggle: If this message is currently playing, clicking stops it immediately!
+        if (playingAudioId === msgId && isSpeaking) {
+          stopAudio();
+          return;
+        }
+
+        // Halt any existing speech or media first
+        stopAudio();
+
+        // Strip non-spoken characters, asterisks, urls, and emojis so voice reads smoothly
+        const cleanText = text
+          .replace(/[*#_~`]/g, '')
+          .replace(/https?:\/\/\S+/g, '')
+          .replace(/[\u{1F300}-\u{1FAFF}]/gu, '')
+          .trim();
+
+        if (!cleanText) return;
+
+        const utt = new SpeechSynthesisUtterance(cleanText);
+        utt.lang = isTe ? 'te-IN' : 'en-IN';
+        utt.rate = 0.95;
+
+        // Try picking natural regional voice if available
+        const voices = window.speechSynthesis.getVoices();
+        const targetPrefix = isTe ? 'te' : 'en';
+        const match = voices.find(v => v.lang.toLowerCase().startsWith(targetPrefix));
+        if (match) utt.voice = match;
+
+        utt.onstart = () => {
+          setPlayingAudioId(msgId);
+          setIsSpeaking(true);
+        };
+
+        // When speech finishes or errors: EXPLICITLY cancel to immediately close Edge media session & audio pipe!
+        utt.onend = () => {
+          setPlayingAudioId(null);
+          setIsSpeaking(false);
+          if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+          }
+        };
+
+        utt.onerror = () => {
+          setPlayingAudioId(null);
+          setIsSpeaking(false);
+          if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+          }
+        };
+
+        // Keep-alive for Chromium 15-second speech synthesis pause bug
+        const keepAlive = setInterval(() => {
+          if (!window.speechSynthesis.speaking) {
+            clearInterval(keepAlive);
+          } else {
+            window.speechSynthesis.pause();
+            window.speechSynthesis.resume();
+          }
+        }, 10000);
+
+        utt.addEventListener('end', () => clearInterval(keepAlive));
+        utt.addEventListener('error', () => clearInterval(keepAlive));
+
+        window.speechSynthesis.speak(utt);
+      };
+
+      return (
+        <div className="app-layout">
+          {/* DESKTOP SIDEBAR */}
+          <aside className="app-sidebar" style={{
+            width: 'var(--sidebar-width)', background: 'var(--bg-card)', borderRight: '1px solid var(--border-subtle)',
+            display: 'flex', flexDirection: 'column', height: '100vh', position: 'sticky', top: 0, zIndex: 40, flexShrink: 0
+          }}>
+            <div style={{ padding: '22px 20px', borderBottom: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => setCurrentTab('dashboard')}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'linear-gradient(135deg, var(--primary-700), var(--primary-900))', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.3rem' }}>
+                🌿
+              </div>
+              <div>
+                <div style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em', lineHeight: 1.1 }}>PCOS Saathi</div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--primary-700)', fontWeight: 600 }}>HEALTH COPILOT</div>
+              </div>
+            </div>
+
+            <nav style={{ flex: 1, padding: '16px 12px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              {[
+                { id: 'dashboard', label: isTe ? 'డాష్‌బోర్డ్' : 'Dashboard', icon: '📊' },
+                { id: 'assistant', label: isTe ? 'AI సాథి (Voice)' : 'AI Voice Assistant', icon: '🎙️' },
+                { id: 'cycle', label: isTe ? 'పీరియడ్ ట్రాకర్' : 'Cycle Tracker', icon: '🌸' },
+                { id: 'food', label: isTe ? 'ఇండియన్ ఫుడ్' : 'Food Companion', icon: '🍲' },
+                { id: 'reports', label: isTe ? 'ల్యాబ్ రిపోర్ట్స్' : 'Medical Reports', icon: '📄' },
+                { id: 'doctor_prep', label: isTe ? 'డాక్టర్ ప్రిపరేషన్' : 'Doctor Visit Prep', icon: '🩺' },
+                { id: 'reminders', label: isTe ? 'కేర్ రిమైండర్లు' : 'Smart Reminders', icon: '⏰' },
+                { id: 'community', label: isTe ? 'సేఫ్ కమ్యూనిటీ' : 'Safe Community', icon: '💬' },
+                { id: 'profile', label: isTe ? 'హెల్త్ ప్రొఫైల్' : 'Health Profile', icon: '👤' },
+                { id: 'settings', label: isTe ? 'సెట్టింగ్స్' : 'Settings', icon: '⚙️' }
+              ].map(item => {
+                const isActive = currentTab === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setCurrentTab(item.id)}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 14px', borderRadius: 'var(--radius-md)',
+                      fontSize: '0.88rem', fontWeight: isActive ? 700 : 500, color: isActive ? 'var(--primary-800)' : 'var(--text-secondary)',
+                      background: isActive ? 'var(--primary-100)' : 'transparent', textAlign: 'left', width: '100%'
+                    }}
+                  >
+                    <span style={{ fontSize: '1.15rem' }}>{item.icon}</span>
+                    <span>{item.label}</span>
+                  </button>
+                );
+              })}
+            </nav>
+
+            <div style={{ padding: '14px 16px', borderTop: '1px solid var(--border-subtle)', background: 'var(--bg-subtle)', fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+              <div style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>🛡️ Educational Support</div>
+              Not for diagnosis. Always consult a physician.
+            </div>
+          </aside>
+
+          {/* MAIN WRAPPER */}
+          <div className="main-wrapper">
+            {/* TOP HEADER */}
+            <header style={{ height: 'var(--navbar-height)', background: 'var(--bg-card)', borderBottom: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 28px', position: 'sticky', top: 0, zIndex: 30 }}>
+              <div>
+                <h2 style={{ fontSize: '1.25rem', color: 'var(--text-primary)', textTransform: 'capitalize' }}>
+                  {currentTab.replace('_', ' ')}
+                </h2>
+                <div style={{ fontSize: '0.72rem', color: 'var(--primary-700)', fontWeight: 600 }}>PERSONALIZED PCOS COPILOT</div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                {/* Language Switch */}
+                <div style={{ display: 'flex', background: 'var(--bg-subtle)', borderRadius: 'var(--radius-sm)', padding: '2px', border: '1px solid var(--border-subtle)' }}>
+                  <button onClick={() => setLanguage('en')} style={{ padding: '4px 10px', borderRadius: '6px', fontSize: '0.78rem', fontWeight: 600, background: language === 'en' ? '#fff' : 'transparent', color: language === 'en' ? 'var(--primary-700)' : 'var(--text-muted)', boxShadow: language === 'en' ? 'var(--shadow-sm)' : 'none' }}>EN</button>
+                  <button onClick={() => setLanguage('te')} style={{ padding: '4px 10px', borderRadius: '6px', fontSize: '0.78rem', fontWeight: 600, background: language === 'te' ? '#fff' : 'transparent', color: language === 'te' ? 'var(--primary-700)' : 'var(--text-muted)', boxShadow: language === 'te' ? 'var(--shadow-sm)' : 'none' }}>తెలుగు</button>
+                </div>
+
+                {/* Profile Badge */}
+                <div onClick={() => setCurrentTab('profile')} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 12px 4px 6px', borderRadius: 'var(--radius-full)', background: 'var(--bg-subtle)', border: '1px solid var(--border-subtle)', cursor: 'pointer' }}>
+                  <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--lavender-700), var(--coral-600))', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.8rem' }}>
+                    {profile.name.charAt(0)}
+                  </div>
+                  <span style={{ fontSize: '0.84rem', fontWeight: 600 }}>{profile.name}</span>
+                </div>
+              </div>
+            </header>
+
+            {/* CONTENT AREA */}
+            <main className="content-area">
+              {/* TAB: DASHBOARD */}
+              {currentTab === 'dashboard' && (
+                <div>
+                  <div style={{ background: 'linear-gradient(135deg, var(--primary-700), var(--primary-900))', borderRadius: 'var(--radius-xl)', padding: '32px 36px', color: '#fff', marginBottom: '28px', boxShadow: '0 10px 25px -5px rgba(15, 118, 110, 0.25)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
+                    <div style={{ maxWidth: '650px' }}>
+                      <div style={{ display: 'inline-block', background: 'rgba(255, 255, 255, 0.2)', padding: '4px 12px', borderRadius: 'var(--radius-full)', fontSize: '0.78rem', fontWeight: 600, marginBottom: '10px' }}>
+                        🌿 {isTe ? 'వ్యక్తిగత ఆరోగ్య మార్గదర్శి' : 'Daily PCOS Health Overview'}
+                      </div>
+                      <h1 style={{ fontSize: '1.9rem', color: '#fff', marginBottom: '8px' }}>
+                        {isTe ? `నమస్తే ${profile.name}, ఈరోజు ఎలా ఉన్నారు?` : `Good morning, ${profile.name}! Let's care for your health today.`}
+                      </h1>
+                      <p style={{ color: 'var(--primary-100)', fontSize: '0.94rem', lineHeight: '1.6' }}>
+                        {isTe ? 'మీ ఆహారం, పీరియడ్ సైకిల్ మరియు ల్యాబ్ పరీక్షల రిపోర్టులను ఇక్కడ ఒకే చోట సులభంగా నిర్వహించుకోండి.' : 'Organize medical documents, explore protein-balanced Indian meals, and prepare with confidence for your clinical interactions.'}
+                      </p>
+                    </div>
+                    <button onClick={() => setCurrentTab('assistant')} className="btn btn-coral btn-lg" style={{ borderRadius: 'var(--radius-full)' }}>
+                      🎙️ {isTe ? 'AI సాథిని అడగండి' : 'Ask PCOS Saathi'}
+                    </button>
+                  </div>
+
+                  {/* 3 Overview Stat Cards */}
+                  <div className="grid-3" style={{ marginBottom: '28px' }}>
+                    <div className="card" onClick={() => setCurrentTab('cycle')} style={{ cursor: 'pointer' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                        <span style={{ fontSize: '1.5rem' }}>🌸</span>
+                        <span className="badge badge-warning">Estimated</span>
+                      </div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>NEXT PERIOD WINDOW</div>
+                      <div style={{ fontSize: '1.4rem', fontWeight: 700, margin: '4px 0', color: 'var(--primary-700)' }}>Oct 28 — Nov 03</div>
+                      <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>Day 14 (Follicular) • ±5 days natural variance</div>
+                    </div>
+
+                    <div className="card" onClick={() => setCurrentTab('reports')} style={{ cursor: 'pointer' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                        <span style={{ fontSize: '1.5rem' }}>📄</span>
+                        <span className="badge badge-coral">Review Needed</span>
+                      </div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>LATEST LAB FINDING</div>
+                      <div style={{ fontSize: '1.4rem', fontWeight: 700, margin: '4px 0', color: 'var(--coral-700)' }}>TSH 4.85 mIU/L</div>
+                      <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>Slightly elevated thyroid marker (Ref: 0.4 - 4.5)</div>
+                    </div>
+
+                    <div className="card" onClick={() => setCurrentTab('reminders')} style={{ cursor: 'pointer' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                        <span style={{ fontSize: '1.5rem' }}>⏰</span>
+                        <span className="badge badge-primary">2 Pending</span>
+                      </div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>TODAY'S CARE ROUTINE</div>
+                      <div style={{ fontSize: '1.4rem', fontWeight: 700, margin: '4px 0' }}>Myo-Inositol</div>
+                      <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>Scheduled for 08:30 AM with water</div>
+                    </div>
+                  </div>
+
+                  {/* Quick Action Matrix */}
+                  <h3 style={{ fontSize: '1.2rem', marginBottom: '14px' }}>Key Actions for Your Journey</h3>
+                  <div className="grid-3" style={{ marginBottom: '28px' }}>
+                    <div className="card" onClick={() => setCurrentTab('food')} style={{ cursor: 'pointer' }}>
+                      <div style={{ fontSize: '2rem', marginBottom: '6px' }}>🍲</div>
+                      <h4 style={{ fontSize: '1.05rem', marginBottom: '4px' }}>Explore Indian Meals</h4>
+                      <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Pesarattu, Ragi Idli, Foxtail Millets with protein balance.</p>
+                    </div>
+
+                    <div className="card" onClick={() => setCurrentTab('doctor_prep')} style={{ cursor: 'pointer' }}>
+                      <div style={{ fontSize: '2rem', marginBottom: '6px' }}>🩺</div>
+                      <h4 style={{ fontSize: '1.05rem', marginBottom: '4px' }}>Doctor Consultation Brief</h4>
+                      <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Synthesize cycle logs and lab findings into a 1-page print sheet.</p>
+                    </div>
+
+                    <div className="card" onClick={() => setCurrentTab('community')} style={{ cursor: 'pointer' }}>
+                      <div style={{ fontSize: '2rem', marginBottom: '6px' }}>💬</div>
+                      <h4 style={{ fontSize: '1.05rem', marginBottom: '4px' }}>Safe PCOS Community</h4>
+                      <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Anonymous Q&A moderated with verified educator answers.</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB: ASSISTANT */}
+              {currentTab === 'assistant' && (
+                <div style={{ maxWidth: '920px', margin: '0 auto' }}>
+                  <div className="card" style={{ padding: 0, overflow: 'hidden', height: '640px', display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-subtle)', background: 'var(--bg-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: 'var(--primary-100)', color: 'var(--primary-800)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>🌿</div>
+                        <div>
+                          <div style={{ fontWeight: 700, fontSize: '0.98rem' }}>PCOS Saathi Voice Assistant</div>
+                          <div style={{ fontSize: '0.72rem', color: 'var(--primary-700)', fontWeight: 600 }}>Bilingual Health Education (Telugu & English)</div>
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {isSpeaking && (
+                          <button
+                            onClick={stopAudio}
+                            style={{
+                              background: 'var(--coral-600)',
+                              color: '#fff',
+                              border: 'none',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              padding: '5px 12px',
+                              borderRadius: '6px',
+                              fontWeight: 700,
+                              fontSize: '0.78rem',
+                              cursor: 'pointer',
+                              boxShadow: '0 2px 8px rgba(225,29,72,0.3)'
+                            }}
+                            title="Stop voice immediately"
+                          >
+                            ⏹️ {isTe ? 'వాయిస్ ఆపు' : 'Stop Audio'}
+                          </button>
+                        )}
+                        <button onClick={() => { stopAudio(); setChatMessages([chatMessages[0]]); }} className="btn btn-outline btn-sm">Clear Chat</button>
+                      </div>
+                    </div>
+
+                    {/* Messages */}
+                    <div style={{ flex: 1, padding: '20px', overflowY: 'auto', background: 'var(--bg-page)', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                      {chatMessages.map(m => {
+                        const isUser = m.sender === 'user';
+                        return (
+                          <div key={m.id} style={{ alignSelf: isUser ? 'flex-end' : 'flex-start', maxWidth: '82%' }}>
+                            <div style={{ background: isUser ? 'var(--primary-700)' : 'var(--bg-card)', color: isUser ? '#fff' : 'var(--text-primary)', border: isUser ? 'none' : '1px solid var(--border-card)', borderRadius: '16px', padding: '14px 18px', boxShadow: 'var(--shadow-sm)' }}>
+                              <div style={{ whiteSpace: 'pre-line', fontSize: '0.92rem', lineHeight: '1.6' }}>{m.text}</div>
+                              {!isUser && (
+                                <div style={{ marginTop: '10px', paddingTop: '8px', borderTop: '1px solid var(--border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
+                                  <div style={{ display: 'flex', gap: '6px' }}>
+                                    {m.sources?.map((s, i) => (
+                                      <span key={i} style={{ fontSize: '0.7rem', color: 'var(--text-muted)', background: 'var(--bg-subtle)', padding: '2px 6px', borderRadius: '4px' }}>📚 {s}</span>
+                                    ))}
+                                  </div>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    {playingAudioId === m.id && isSpeaking && (
+                                      <span style={{ fontSize: '0.72rem', color: 'var(--coral-600)', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                        <span style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', background: 'var(--coral-600)' }}></span>
+                                        {isTe ? 'మాట్లాడుతోంది...' : 'Speaking...'}
+                                      </span>
+                                    )}
+                                    <button
+                                      onClick={() => togglePlayAudio(m.id, m.text)}
+                                      style={{
+                                        background: playingAudioId === m.id && isSpeaking ? 'var(--coral-600)' : 'var(--coral-50)',
+                                        color: playingAudioId === m.id && isSpeaking ? '#ffffff' : 'var(--coral-700)',
+                                        border: playingAudioId === m.id && isSpeaking ? '1px solid var(--coral-600)' : '1px solid var(--coral-100)',
+                                        padding: '4px 10px',
+                                        borderRadius: '6px',
+                                        fontSize: '0.75rem',
+                                        fontWeight: 600,
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '4px',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.15s ease'
+                                      }}
+                                    >
+                                      {playingAudioId === m.id && isSpeaking ? (
+                                        <>⏹️ {isTe ? 'ఆడియో ఆపు' : 'Stop Audio'}</>
+                                      ) : (
+                                        <>🔊 {isTe ? 'వాయిస్ వినండి' : 'Listen Audio'}</>
+                                      )}
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Quick chips & input */}
+                    <div style={{ padding: '14px 18px', borderTop: '1px solid var(--border-subtle)', background: 'var(--bg-card)' }}>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '10px' }}>
+                        {[
+                          isTe ? "PCOS అంటే ఏమిటి?" : "What is PCOS?",
+                          isTe ? "ఆహారపు అలవాట్లు ఎలా ఉండాలి?" : "What Indian foods help insulin resistance?",
+                          isTe ? "డాక్టర్‌ని ఎప్పుడు కలవాలి?" : "What questions should I ask my doctor?"
+                        ].map((chip, idx) => (
+                          <button key={idx} onClick={() => handleSendChat(chip)} style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border-subtle)', padding: '4px 10px', borderRadius: '999px', fontSize: '0.76rem', color: 'var(--text-secondary)' }}>💬 {chip}</button>
+                        ))}
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button onClick={handleVoiceInput} className={isListening ? 'mic-active' : ''} style={{ width: '46px', height: '46px', borderRadius: '50%', background: isListening ? 'var(--coral-600)' : 'var(--primary-700)', color: '#fff', fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Speak in Telugu or English">
+                          🎙️
+                        </button>
+                        <input
+                          type="text"
+                          placeholder={isTe ? "ఇక్కడ మీ ప్రశ్న అడగండి..." : "Ask your question in English or Telugu..."}
+                          value={chatInput}
+                          onChange={e => setChatInput(e.target.value)}
+                          onKeyDown={e => e.key === 'Enter' && handleSendChat()}
+                          style={{ flex: 1, borderRadius: 'var(--radius-full)', padding: '10px 18px' }}
+                        />
+                        <button onClick={() => handleSendChat()} className="btn btn-primary" style={{ borderRadius: 'var(--radius-full)' }}>Send</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB: CYCLE */}
+              {currentTab === 'cycle' && (
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '22px' }}>
+                    <div>
+                      <h2 style={{ fontSize: '1.6rem' }}>🌸 Menstrual Cycle & Symptom Tracker</h2>
+                      <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>Models natural PCOS variance (±4-6 days) rather than false exact dates.</p>
+                    </div>
+                    <button onClick={() => setActiveModal('log_cycle')} className="btn btn-coral">+ Log Period</button>
+                  </div>
+
+                  <div className="grid-2">
+                    {/* Calendar simulation */}
+                    <div className="card">
+                      <h3 style={{ fontSize: '1.15rem', marginBottom: '14px' }}>October 2026 Calendar</h3>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '6px', textAlign: 'center', fontSize: '0.84rem' }}>
+                        {['S','M','T','W','T','F','S'].map((d, i) => <div key={i} style={{ fontWeight: 700, color: 'var(--text-muted)' }}>{d}</div>)}
+                        {Array.from({ length: 31 }).map((_, i) => {
+                          const day = i + 1;
+                          const isPeriod = day >= 25 && day <= 28;
+                          const isEst = day >= 28 && day <= 31;
+                          return (
+                            <div key={day} style={{ padding: '8px 0', borderRadius: '6px', background: isPeriod ? 'var(--coral-100)' : isEst ? 'var(--accent-yellow-light)' : 'var(--bg-subtle)', color: isPeriod ? 'var(--coral-700)' : 'var(--text-primary)', fontWeight: isPeriod ? 700 : 500 }}>
+                              {day}
+                              {isPeriod && <div style={{ fontSize: '0.6rem' }}>🩸</div>}
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <div style={{ marginTop: '16px', display: 'flex', gap: '12px', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                        <div>🩸 Recorded Period</div>
+                        <div>⏱️ Estimated Window (±5 days)</div>
+                      </div>
+                    </div>
+
+                    {/* Logs history */}
+                    <div className="card">
+                      <h3 style={{ fontSize: '1.15rem', marginBottom: '14px' }}>Cycle History ({cycleLogs.length})</h3>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        {cycleLogs.map(c => (
+                          <div key={c.id} style={{ background: 'var(--bg-subtle)', padding: '12px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
+                            <div style={{ fontWeight: 700, fontSize: '0.94rem' }}>Started on {c.startDate}</div>
+                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Duration: {c.durationDays} days • Flow: {c.flow}</div>
+                            <div style={{ display: 'flex', gap: '4px', marginTop: '6px' }}>
+                              {c.symptoms.map((s, idx) => <span key={idx} className="badge badge-coral">{s}</span>)}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB: FOOD */}
+              {currentTab === 'food' && (
+                <div>
+                  <div style={{ marginBottom: '22px' }}>
+                    <h2 style={{ fontSize: '1.6rem' }}>🍲 Indian Food PCOS Companion</h2>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>Balanced home-cooked dishes (idli, pesarattu, dal, millets) supporting steady insulin release.</p>
+                  </div>
+
+                  {/* Daily Plan Widget */}
+                  <div className="card" style={{ background: 'var(--primary-50)', borderColor: 'var(--primary-200)', marginBottom: '24px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                      <h3 style={{ fontSize: '1.1rem', color: 'var(--primary-900)' }}>Today's Meal Plan</h3>
+                      <button onClick={() => setDailyPlan({ breakfast: null, lunch: null, dinner: null })} className="btn btn-ghost btn-sm" style={{ color: 'var(--coral-700)' }}>Reset</button>
+                    </div>
+                    <div className="grid-3">
+                      {['breakfast', 'lunch', 'dinner'].map(slot => (
+                        <div key={slot} style={{ background: '#fff', padding: '14px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
+                          <div style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>{slot}</div>
+                          {dailyPlan[slot] ? (
+                            <div>
+                              <div style={{ fontWeight: 700, marginTop: '4px' }}>{dailyPlan[slot].image} {dailyPlan[slot].name}</div>
+                              <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>{dailyPlan[slot].protein}</div>
+                            </div>
+                          ) : (
+                            <div style={{ fontSize: '0.8rem', color: 'var(--text-light)', marginTop: '4px' }}>No dish selected yet</div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Meals grid */}
+                  <div className="grid-3">
+                    {INDIAN_MEALS.map(m => (
+                      <div key={m.id} className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                        <div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                            <span className="badge badge-primary">{m.category}</span>
+                            <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>⏱️ {m.prepTime}</span>
+                          </div>
+                          <h4 style={{ fontSize: '1.1rem', marginBottom: '6px' }}>{m.image} {m.name}</h4>
+                          <p style={{ fontSize: '0.84rem', color: 'var(--text-secondary)', marginBottom: '12px', lineHeight: 1.5 }}>{m.whyItWorks}</p>
+                        </div>
+                        <div>
+                          <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '10px', marginBottom: '12px', fontSize: '0.78rem', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between' }}>
+                            <span>💪 {m.protein}</span>
+                            <span>🌾 {m.fibre}</span>
+                          </div>
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <button onClick={() => { setSelectedMealDetail(m); setActiveModal('meal_detail'); }} className="btn btn-outline btn-sm" style={{ flex: 1 }}>Recipe</button>
+                            <button onClick={() => setDailyPlan(prev => ({ ...prev, [m.category === 'breakfast' ? 'breakfast' : m.category === 'lunch' ? 'lunch' : 'dinner']: m }))} className="btn btn-primary btn-sm" style={{ flex: 1 }}>+ Add to Plan</button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* TAB: REPORTS */}
+              {currentTab === 'reports' && (
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '22px' }}>
+                    <div>
+                      <h2 style={{ fontSize: '1.6rem' }}>📄 Medical Reports & Record Intelligence</h2>
+                      <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>Upload documents to benchmark lab biomarkers and decode medical jargon.</p>
+                    </div>
+                  </div>
+
+                  <div className="grid-2">
+                    {/* Upload box */}
+                    <div className="card">
+                      <h3 style={{ fontSize: '1.15rem', marginBottom: '12px' }}>Upload Document</h3>
+                      <div style={{ border: '2px dashed var(--border-subtle)', padding: '30px', textAlign: 'center', borderRadius: '12px', background: 'var(--bg-subtle)', marginBottom: '14px', cursor: 'pointer' }} onClick={() => alert("Upload dialog simulated. File stays in local demo session.")}>
+                        <div style={{ fontSize: '2rem' }}>📂</div>
+                        <div style={{ fontWeight: 600, fontSize: '0.92rem', marginTop: '6px' }}>Click or Drag & Drop PDF / JPG</div>
+                        <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>Files held locally in browser state</div>
+                      </div>
+                    </div>
+
+                    {/* Reports list */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      {reports.map(r => (
+                        <div key={r.id} className="card">
+                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                            <span className="badge badge-primary">{r.category}</span>
+                            <span className="badge badge-coral">Biomarkers Flagged</span>
+                          </div>
+                          <h4 style={{ fontSize: '1.05rem', marginBottom: '4px' }}>{r.fileName}</h4>
+                          <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '12px' }}>Uploaded on {r.uploadDate}</p>
+                          <button onClick={() => { setSelectedReportDetail(r); setActiveModal('report_detail'); }} className="btn btn-primary btn-sm">View Extracted Biomarkers & Plain English</button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB: DOCTOR PREP */}
+              {currentTab === 'doctor_prep' && (
+                <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '22px' }}>
+                    <div>
+                      <h2 style={{ fontSize: '1.6rem' }}>🩺 Doctor Visit Preparation Brief</h2>
+                      <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>1-page appointment sheet synthesizing symptoms, cycles, and lab findings.</p>
+                    </div>
+                    <button onClick={() => window.print()} className="btn btn-primary">🖨️ Print Clinical Sheet</button>
+                  </div>
+
+                  <div className="card" style={{ padding: '32px', background: '#fff', border: '2px solid var(--border-subtle)' }}>
+                    <div style={{ borderBottom: '2px solid var(--primary-700)', paddingBottom: '12px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between' }}>
+                      <div>
+                        <h3 style={{ color: 'var(--primary-800)', fontSize: '1.3rem' }}>PATIENT CONSULTATION SHEET</h3>
+                        <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Prepared via PCOS Saathi Health Copilot</div>
+                      </div>
+                      <div style={{ textAlign: 'right', fontSize: '0.85rem' }}>
+                        <strong>{profile.name}</strong>, 24 yrs<br />
+                        Date: Oct 09, 2026
+                      </div>
+                    </div>
+
+                    <div style={{ marginBottom: '18px' }}>
+                      <h4 style={{ color: 'var(--primary-900)', borderLeft: '3px solid var(--primary-700)', paddingLeft: '8px', marginBottom: '6px' }}>1. Menstrual Pattern</h4>
+                      <p style={{ fontSize: '0.88rem', background: 'var(--bg-subtle)', padding: '10px', borderRadius: '6px' }}>
+                        Latest period logged on <strong>Sep 25, 2026</strong> (4 days flow, medium). Typical cycle length interval: <strong>33-38 days</strong> with natural ovulatory fluctuations.
+                      </p>
+                    </div>
+
+                    <div style={{ marginBottom: '18px' }}>
+                      <h4 style={{ color: 'var(--primary-900)', borderLeft: '3px solid var(--primary-700)', paddingLeft: '8px', marginBottom: '6px' }}>2. Flagged Lab Biomarkers</h4>
+                      <div style={{ fontSize: '0.86rem', background: 'var(--accent-yellow-light)', color: '#854d0e', padding: '10px', borderRadius: '6px', fontWeight: 600 }}>
+                        • TSH (Thyroid Stimulating Hormone): 4.85 mIU/L (Ref: 0.40 - 4.50) — Mildly Elevated<br />
+                        • Fasting Insulin: 18.4 uIU/mL (Upper reference boundary)
+                      </div>
+                    </div>
+
+                    <div style={{ marginBottom: '18px' }}>
+                      <h4 style={{ color: 'var(--coral-700)', borderLeft: '3px solid var(--coral-600)', paddingLeft: '8px', marginBottom: '6px' }}>3. Questions for My Physician</h4>
+                      <ul style={{ paddingLeft: '22px', fontSize: '0.88rem', lineHeight: '1.8' }}>
+                        <li>Do my mildly elevated TSH levels (4.85) require thyroid antibody screening?</li>
+                        <li>Should I continue Inositol supplementation alongside dietary adjustments?</li>
+                        <li>Are my symptoms indicative of cellular insulin resistance?</li>
+                        <li>When should we schedule a follow-up pelvic ultrasound?</li>
+                      </ul>
+                    </div>
+
+                    <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '12px', fontSize: '0.74rem', color: 'var(--text-muted)', textAlign: 'center', fontStyle: 'italic' }}>
+                      Prepared to facilitate clear patient-clinician communication. Does not constitute an automated medical diagnosis.
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB: REMINDERS */}
+              {currentTab === 'reminders' && (
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '22px' }}>
+                    <div>
+                      <h2 style={{ fontSize: '1.6rem' }}>⏰ Smart Care Reminders</h2>
+                      <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>Daily medication routines, clinician-recommended blood tests, and movement habits.</p>
+                    </div>
+                    <button onClick={() => {
+                      const title = prompt("Reminder title (e.g., Metformin 500mg, Evening Walk):");
+                      if (title) setReminders([...reminders, { id: Date.now(), title, category: 'medication', time: '08:30 PM', completed: false, notes: 'User added' }]);
+                    }} className="btn btn-primary">+ Add Reminder</button>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {reminders.map(rem => (
+                      <div key={rem.id} className="card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', background: rem.completed ? 'var(--bg-subtle)' : '#fff', opacity: rem.completed ? 0.7 : 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                          <input type="checkbox" checked={rem.completed} onChange={() => setReminders(reminders.map(r => r.id === rem.id ? { ...r, completed: !r.completed } : r))} style={{ width: '18px', height: '18px' }} />
+                          <div>
+                            <div style={{ fontWeight: 600, textDecoration: rem.completed ? 'line-through' : 'none' }}>{rem.title}</div>
+                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>🕒 {rem.time} • {rem.notes}</div>
+                          </div>
+                        </div>
+                        <button onClick={() => setReminders(reminders.filter(r => r.id !== rem.id))} style={{ color: 'var(--text-muted)' }}>🗑️</button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* TAB: COMMUNITY */}
+              {currentTab === 'community' && (
+                <div>
+                  <div style={{ marginBottom: '22px' }}>
+                    <h2 style={{ fontSize: '1.6rem' }}>💬 Safe PCOS Educational Community</h2>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>Anonymous question-and-answer space moderated by verified health educators.</p>
+                  </div>
+
+                  <div style={{ background: 'var(--primary-50)', padding: '12px 18px', borderRadius: '10px', marginBottom: '20px', fontSize: '0.82rem', color: 'var(--primary-900)' }}>
+                    🔒 <strong>Community Protection:</strong> All posts use anonymous pseudonyms. Please do not share private addresses or hospital IDs.
+                  </div>
+
+                  <div className="card" style={{ marginBottom: '16px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Asked by <strong>Anonymous Saathi #842</strong> • 2 days ago</span>
+                      <span className="badge badge-primary">Nutrition</span>
+                    </div>
+                    <h4 style={{ fontSize: '1.1rem', marginBottom: '6px' }}>How do you manage dairy and chai cravings with South Indian breakfast?</h4>
+                    <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', marginBottom: '14px' }}>My doctor suggested checking if dairy reduction improves my acne. What swaps worked for you?</p>
+
+                    <div style={{ background: 'var(--bg-subtle)', borderLeft: '3px solid var(--primary-700)', padding: '12px 14px', borderRadius: '0 8px 8px 0' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                        <strong style={{ fontSize: '0.82rem', color: 'var(--primary-900)' }}>Dr. Ananya Rao</strong>
+                        <span className="badge badge-success">✓ Verified Educator</span>
+                      </div>
+                      <p style={{ fontSize: '0.84rem', color: 'var(--text-secondary)' }}>Fermented curd in small portions has lower lactose and supports gut health. For morning chai, switching to unsweetened almond or oat milk provides a gentle glucose curve without spiking morning insulin.</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB: PROFILE */}
+              {currentTab === 'profile' && (
+                <div style={{ maxWidth: '780px', margin: '0 auto' }}>
+                  <h2 style={{ fontSize: '1.6rem', marginBottom: '16px' }}>👤 My Health Profile</h2>
+                  <div className="card">
+                    <div className="grid-2">
+                      <div className="form-group">
+                        <label className="form-label">Display Name</label>
+                        <input type="text" value={profile.name} onChange={e => setProfile({ ...profile, name: e.target.value })} />
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Age</label>
+                        <input type="number" value={profile.age} onChange={e => setProfile({ ...profile, age: e.target.value })} />
+                      </div>
+                    </div>
+                    <div className="grid-2">
+                      <div className="form-group">
+                        <label className="form-label">Dietary Habit</label>
+                        <select value={profile.diet} onChange={e => setProfile({ ...profile, diet: e.target.value })}>
+                          <option value="vegetarian">Vegetarian</option>
+                          <option value="eggitarian">Eggitarian</option>
+                          <option value="non_vegetarian">Non-Vegetarian</option>
+                        </select>
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Baseline Cycle Length (Days)</label>
+                        <input type="number" value={profile.cycleLength} onChange={e => setProfile({ ...profile, cycleLength: e.target.value })} />
+                      </div>
+                    </div>
+                    <button onClick={() => alert("Profile saved to local browser storage!")} className="btn btn-primary" style={{ marginTop: '10px' }}>Save Profile</button>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB: SETTINGS */}
+              {currentTab === 'settings' && (
+                <div style={{ maxWidth: '780px', margin: '0 auto' }}>
+                  <h2 style={{ fontSize: '1.6rem', marginBottom: '16px' }}>⚙️ Application Settings</h2>
+                  <div className="card">
+                    <h3 style={{ fontSize: '1.1rem', marginBottom: '12px' }}>Local Storage & Privacy</h3>
+                    <p style={{ fontSize: '0.86rem', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+                      All demo records are kept strictly in your local browser state. No data is transmitted across third-party AI tracking servers.
+                    </p>
+                    <button onClick={() => { localStorage.clear(); alert("Local demo state cleared. Reloading..."); window.location.reload(); }} className="btn btn-coral btn-sm">
+                      ⚠️ Reset All Demo Records to Default
+                    </button>
+                  </div>
+                </div>
+              )}
+            </main>
+          </div>
+
+          {/* MEAL DETAIL MODAL */}
+          {activeModal === 'meal_detail' && selectedMealDetail && (
+            <div className="modal-overlay" onClick={() => setActiveModal(null)}>
+              <div className="modal-content" onClick={e => e.stopPropagation()}>
+                <div className="modal-header">
+                  <h3>{selectedMealDetail.image} {selectedMealDetail.name}</h3>
+                  <button onClick={() => setActiveModal(null)}>✕</button>
+                </div>
+                <div className="modal-body">
+                  <div style={{ background: 'var(--primary-50)', padding: '12px', borderRadius: '8px', marginBottom: '14px', fontSize: '0.86rem' }}>
+                    <strong>Why it works for PCOS:</strong> {selectedMealDetail.whyItWorks}
+                  </div>
+                  <h4 style={{ marginBottom: '6px' }}>Ingredients</h4>
+                  <ul style={{ paddingLeft: '20px', fontSize: '0.86rem', marginBottom: '14px' }}>
+                    {selectedMealDetail.ingredients.map((ing, i) => <li key={i}>{ing}</li>)}
+                  </ul>
+                  <h4 style={{ marginBottom: '6px' }}>Method</h4>
+                  <p style={{ fontSize: '0.86rem' }}>{selectedMealDetail.instructions}</p>
+                </div>
+                <div className="modal-footer">
+                  <button onClick={() => setActiveModal(null)} className="btn btn-primary btn-sm">Close</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* REPORT DETAIL MODAL */}
+          {activeModal === 'report_detail' && selectedReportDetail && (
+            <div className="modal-overlay" onClick={() => setActiveModal(null)}>
+              <div className="modal-content" style={{ maxWidth: '680px' }} onClick={e => e.stopPropagation()}>
+                <div className="modal-header">
+                  <h3>📄 {selectedReportDetail.fileName}</h3>
+                  <button onClick={() => setActiveModal(null)}>✕</button>
+                </div>
+                <div className="modal-body">
+                  <div style={{ marginBottom: '12px', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                    Context: {selectedReportDetail.doctorNotes}
+                  </div>
+                  <h4 style={{ marginBottom: '10px' }}>Extracted Biomarkers</h4>
+                  <div style={{ overflowX: 'auto', marginBottom: '16px' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+                      <thead>
+                        <tr style={{ borderBottom: '2px solid var(--border-subtle)', textAlign: 'left' }}>
+                          <th style={{ padding: '8px' }}>Parameter</th>
+                          <th style={{ padding: '8px' }}>Value</th>
+                          <th style={{ padding: '8px' }}>Range</th>
+                          <th style={{ padding: '8px' }}>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {selectedReportDetail.biomarkers.map((b, i) => (
+                          <React.Fragment key={i}>
+                            <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                              <td style={{ padding: '8px', fontWeight: 600 }}>{b.testName}</td>
+                              <td style={{ padding: '8px', fontWeight: 700 }}>{b.value} {b.unit}</td>
+                              <td style={{ padding: '8px', color: 'var(--text-muted)' }}>{b.referenceRange}</td>
+                              <td style={{ padding: '8px' }}>
+                                <span className={`badge ${b.status === 'elevated' ? 'badge-coral' : 'badge-success'}`}>{b.status}</span>
+                              </td>
+                            </tr>
+                            <tr style={{ background: 'var(--bg-subtle)' }}>
+                              <td colSpan="4" style={{ padding: '6px 8px', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>💡 Plain English: {b.plainExplanation}</td>
+                            </tr>
+                          </React.Fragment>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div style={{ background: 'var(--primary-50)', padding: '12px', borderRadius: '8px', fontSize: '0.84rem' }}>
+                    <strong>Clinician Synthesis:</strong> {selectedReportDetail.plainSummary}
+                  </div>
+                </div>
+                <div className="modal-footer">
+                  <button onClick={() => setActiveModal(null)} className="btn btn-primary btn-sm">Close</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* LOG CYCLE MODAL */}
+          {activeModal === 'log_cycle' && (
+            <div className="modal-overlay" onClick={() => setActiveModal(null)}>
+              <div className="modal-content" onClick={e => e.stopPropagation()}>
+                <div className="modal-header">
+                  <h3>🌸 Log Period Event</h3>
+                  <button onClick={() => setActiveModal(null)}>✕</button>
+                </div>
+                <div className="modal-body">
+                  <div className="form-group">
+                    <label className="form-label">Period Start Date</label>
+                    <input type="date" defaultValue="2026-10-09" id="log-start" />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Duration (Days)</label>
+                    <input type="number" defaultValue="4" id="log-duration" />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Flow Intensity</label>
+                    <select id="log-flow">
+                      <option value="medium">Medium</option>
+                      <option value="light">Light</option>
+                      <option value="heavy">Heavy</option>
+                      <option value="spotting">Spotting</option>
+                    </select>
+                  </div>
+                  <button onClick={() => {
+                    const startDate = document.getElementById('log-start').value;
+                    const durationDays = document.getElementById('log-duration').value;
+                    const flow = document.getElementById('log-flow').value;
+                    setCycleLogs([{ id: Date.now(), startDate, durationDays, flow, symptoms: ['cramps'], notes: 'Logged in app' }, ...cycleLogs]);
+                    setActiveModal(null);
+                  }} className="btn btn-coral" style={{ width: '100%', marginTop: '10px' }}>Save Cycle Log</button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
