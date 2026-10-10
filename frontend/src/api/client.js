@@ -1,9 +1,11 @@
-const API_BASE_URL = '/api/v1';
+const RAW_API_URL = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+const API_BASE_URL = RAW_API_URL ? `${RAW_API_URL}/api/v1` : '/api/v1';
 
 export const apiClient = {
   async getHealth() {
     try {
-      const res = await fetch('/health');
+      const healthUrl = RAW_API_URL ? `${RAW_API_URL}/health` : '/health';
+      const res = await fetch(healthUrl);
       if (!res.ok) throw new Error('Health check failed');
       return await res.json();
     } catch (e) {
